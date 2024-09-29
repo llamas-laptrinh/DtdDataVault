@@ -4,12 +4,13 @@ import "@nomicfoundation/hardhat-toolbox";
 const config: HardhatUserConfig = {
   solidity: "0.8.27",
   networks: {
-    scrollSepolia: {
-      url: "https://sepolia-rpc.scroll.io/" || "",
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+
+    sepolia: {
+      url: `https://scroll-sepolia.g.alchemy.com/v2/`,
+      accounts: [""],
     },
-  }
+
+  }, defaultNetwork: "sepolia"
 };
 
 export default config;

@@ -6,7 +6,7 @@ contract DataVault {
         uint256 expiry;
         bool granted;
     }
-
+    constructor() {}
     mapping(address => bytes) private userData; // Map each user to their data
     mapping(address => mapping(address => DataAccess)) public accessList; // Map user's permissions for each third-party app
 
