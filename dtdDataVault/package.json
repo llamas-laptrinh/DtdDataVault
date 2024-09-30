@@ -16,8 +16,10 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
+    "@metamask/sdk-react": "^0.28.4",
     "@react-navigation/native": "^6.0.2",
-    "ethers": "^6.13.2",
+    "Buffer": "^0.0.0",
+    "ethers": "^5.7.2",
     "expo": "~51.0.28",
     "expo-constants": "~16.0.2",
     "expo-font": "~12.0.9",

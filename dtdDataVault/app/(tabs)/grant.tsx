@@ -1,36 +1,59 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView, Image } from 'react-native';
-import Web3 from 'web3';
+
 import { Ionicons } from '@expo/vector-icons'; // Importing Expo vector icons
+import VaultData from '@/utils';
+import { getProvier } from '@/utils/getProvider';
+import { useSDK } from '@metamask/sdk-react';
 // import DataVaultContract from './DataVaultABI.json'; // Contract ABI
 
-const web3 = new Web3("https://your-blockchain-provider-url");
+
+
+
+export const initVault = async (provider: any) => {
+    const { signer } = await getProvier(provider)
+    if (!signer) {
+        return null
+    }
+
+    const vault = new VaultData(signer); // Pass the provider as an argument
+    return vault;
+}
+
 
 export default function DataVaultApp() {
-    const [data, setData] = useState('');
     const [app, setApp] = useState('');
-    const [additionalField, setAdditionalField] = useState(''); // New field for additional data
-    const [contract, setContract] = useState(null);
+    const [contract, setContract] = useState<VaultData>();
+    const [notificationText, setNotificationText] = React.useState("")
+    const {  provider } = useSDK();
 
     // Load the contract
     const loadContract = async () => {
-        const contractAddress = "0xYourContractAddress";
-        // const vaultContract = new web3.eth.Contract(DataVaultContract, contractAddress);
-        // setContract(vaultContract);
+        const vaultContract = await initVault(provider);
+        if (vaultContract) {
+            setContract(vaultContract);
+        }
+
     };
 
-    // Store data
+    React.useEffect(() => {
+        console.log("running")
+        loadContract()
+    }, [])
+    // // Store data
     const storeData = async () => {
-        const accounts = await web3.eth.getAccounts();
-        await contract.methods.storeData(web3.utils.asciiToHex(data + additionalField)) // Store both data fields
-            .send({ from: accounts[0] });
+        const isStored = await contract?.storeData({})
+
     };
 
     // Grant access
     const grantAccess = async () => {
-        const accounts = await web3.eth.getAccounts();
-        await contract.methods.grantAccess(app, 3600) // Grant access for 1 hour
-            .send({ from: accounts[0] });
+        console.log("app", app)
+        const isGranted = await contract?.grantAccess(app);
+        if (isGranted) {
+            return setNotificationText("Grant access success")
+        }
+        return setNotificationText('Grant access error')
     };
 
     return (
@@ -54,10 +77,7 @@ export default function DataVaultApp() {
                 <TouchableOpacity style={styles.button} onPress={grantAccess}>
                     <Text style={styles.buttonText}>Grant Access</Text>
                 </TouchableOpacity>
-
-                {/* <TouchableOpacity style={styles.button} onPress={loadContract}>
-                    <Text style={styles.buttonText}>Load Contract</Text>
-                </TouchableOpacity> */}
+                <Text style={styles.notificationText}>{notificationText}</Text>
             </View>
         </ScrollView>
     );
@@ -99,5 +119,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold'
+    },
+    notificationText: {
+        color: '#ff0000', // Example color for notification text
+        fontSize: 14,
+        marginTop: 10,
     },
 });

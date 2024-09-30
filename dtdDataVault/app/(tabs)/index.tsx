@@ -1,21 +1,41 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { initVault } from './grant';
+import { useSDK } from '@metamask/sdk-react';
+import VaultData from '@/utils';
 
 export default function HomeScreen() {
+
+  const [contract, setContract] = useState<VaultData>();
+  const [notificationText, setNotificationText] = React.useState("")
+  const { provider } = useSDK();
+
   const [activeTab, setActiveTab] = useState('userInfo');
   const [userInfo, setUserInfo] = useState({
-    name: '',
-    email: '',
-    id: '',
-    phone: '',
-    address: '',
+    name: 'test name',
+    email: 'test@gmail.com',
+    id: '1231231231',
+    phone: '090000000',
+    address: 'test address',
   });
   const [passportInfo, setPassportInfo] = useState({
     passportNumber: '',
     nationality: '',
     expiryDate: '',
   });
+
+  const loadContract = async () => {
+    const vaultContract = await initVault(provider);
+    if (vaultContract) {
+      setContract(vaultContract);
+    }
+
+  };
+
+  React.useEffect(() => {
+    loadContract()
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setUserInfo({ ...userInfo, [field]: value });
@@ -25,10 +45,13 @@ export default function HomeScreen() {
     setPassportInfo({ ...passportInfo, [field]: value });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Handle form submission logic here
-    console.log(userInfo);
-    console.log(passportInfo);
+    if (activeTab === "userInfo") {
+      console.log(userInfo)
+      await contract?.storeData("0x7b226e616d65223a2274657374206e616d65222c22656d61696c223a227465737440676d61696c2e636f6d222c226964223a2231323331323331323331222c2270686f6e65223a22303930303030303030222c2261646472657373223a22746573742061646472657373227d")
+    }
+
   };
 
   return (
@@ -51,6 +74,7 @@ export default function HomeScreen() {
               style={styles.input}
               placeholder="Enter Name"
               placeholderTextColor="#A9A9A9"
+              value={userInfo.name}
               onChangeText={(value) => handleInputChange('name', value)}
             />
           </View>
@@ -59,6 +83,7 @@ export default function HomeScreen() {
             <TextInput
               style={styles.input}
               placeholder="Enter Email"
+              value={userInfo.email}
               placeholderTextColor="#A9A9A9"
               onChangeText={(value) => handleInputChange('email', value)}
             />
@@ -68,6 +93,7 @@ export default function HomeScreen() {
             <TextInput
               style={styles.input}
               placeholder="Enter ID"
+              value={userInfo.id}
               placeholderTextColor="#A9A9A9"
               onChangeText={(value) => handleInputChange('id', value)}
             />
@@ -77,6 +103,7 @@ export default function HomeScreen() {
             <TextInput
               style={styles.input}
               placeholder="Enter Phone"
+              value={userInfo.phone}
               placeholderTextColor="#A9A9A9"
               onChangeText={(value) => handleInputChange('phone', value)}
             />
@@ -86,6 +113,7 @@ export default function HomeScreen() {
             <TextInput
               style={styles.input}
               placeholder="Enter Address"
+              value={userInfo.address}
               placeholderTextColor="#A9A9A9"
               onChangeText={(value) => handleInputChange('address', value)}
             />

@@ -1,5 +1,9 @@
+import VaultData from '@/utils';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, View, Text, FlatList } from 'react-native';
+import { useSDK } from '@metamask/sdk-react';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { initVault } from './grant';
 
 interface DataItem {
   id: string;
@@ -16,6 +20,30 @@ const data: DataItem[] = [
 ];
 
 export default function TabTwoScreen() {
+
+  const [contract, setContract] = useState<VaultData>();
+  const [notificationText, setNotificationText] = React.useState("")
+  const { provider, account } = useSDK();
+
+  const loadContract = async () => {
+    const vaultContract = await initVault(provider);
+    if (vaultContract) {
+      setContract(vaultContract);
+    }
+
+  };
+
+  React.useEffect(() => {
+    loadContract()
+  }, [])
+
+
+  const onGetAccessData = async () => {
+    console.log("account", account)
+    const data = await contract?.retrieveData(account || "0x2f134C0F0b85B8E048025745b02d452Aa29E9CCA")
+    console.log(data)
+  }
+
   const renderItem = ({ item }: { item: DataItem }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.titleText}>
@@ -49,6 +77,9 @@ export default function TabTwoScreen() {
         renderItem={renderItem}
         keyExtractor={item => item.id}
       />
+      <TouchableOpacity style={styles.button} onPress={onGetAccessData}>
+        <Text style={styles.buttonText}>Get Accessed Data</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -60,6 +91,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#e9f5fb',
     justifyContent: "center",
     alignItems: "center"
+  },
+  button: {
+    backgroundColor: '#19232c', // Updated primary color
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    marginBottom: 15
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold'
   },
   itemContainer: {
     padding: 20,
@@ -103,6 +146,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 2,
-    gap:4
+    gap: 4
   },
 });
